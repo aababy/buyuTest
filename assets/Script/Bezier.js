@@ -16,10 +16,29 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        this.scheduleOnce(this.runBezier, 2);
+        this.scheduleOnce(this.generateCoins, 0);
         //this.scheduleOnce(this.runBezier, 2);
         //this.draw();
 
+    },
+
+    generateCoins: function () {
+        cc.loader.loadRes("Prefab/Coins", function (err , prefable) {  
+            for (let index = 0; index < 5; index++) {
+                var node = cc.instantiate(prefable);
+                node.position = cc.v2(0 + index * 20, 0);
+                
+                var bezierParam = [cc.p(0, 166), cc.p(0, 166), cc.p(0, 0)];     
+                var bezier = cc.bezierBy(1, bezierParam);
+                bezierParam = [cc.p(0, 20), cc.p(0, 20), cc.p(0, 0)];
+                var bezier1 = cc.bezierBy(1, bezierParam);
+
+                var seq = cc.sequence(bezier, bezier1);
+                node.runAction(seq);
+
+                this.node.addChild(node);
+            }
+        }.bind(this));
     },
 
     //http://www.j--d.com/bezier 工具
