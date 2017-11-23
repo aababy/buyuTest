@@ -23,6 +23,7 @@ cc.Class({
 
         var array = [
             [10.0, 2.96, 6.85, 3.23, 9.9, 8.57, 0, 8.3],
+            [10, 9.24, -3.06, 6.84, 5.23, 2.94, 0, 0.68],
             [0, 7.85, 13.1, 7.02, 2.79, 0.49, 10, 0.58],
             [0, 1.92, 4.34, 6.45, 7.88, 4.55, 10, 10],
         ];
@@ -41,7 +42,7 @@ cc.Class({
             }
         }
 
-        this.index = 2;
+        this.index = 1;
     },
 
     generateCoins: function () {
@@ -63,13 +64,14 @@ cc.Class({
         }.bind(this));
     },
 
+    //匀速曲线， 后面来弄 http://blog.csdn.net/kongbu0622/article/details/10124065
     //http://www.j--d.com/bezier 工具
     runBezier: function () {
         this.node.position = this.bez[this.index][0];
 
         // var bezierParam = [cc.p(0, cc.winSize.height / 2), cc.p(300, -cc.winSize.height / 2), cc.p(300, 100)];
         var bezierParam = [this.bez[this.index][1], this.bez[this.index][2], this.bez[this.index][3]];     //抛物线
-        var bezier = cc.bezierTo(16, bezierParam);
+        var bezier = cc.bezierTo(16, bezierParam).easing(cc.easeInOut(3.0));
 
         this.node.runAction(bezier);
     },
