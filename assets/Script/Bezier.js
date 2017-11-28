@@ -27,14 +27,16 @@ cc.Class({
 
     // use this for initialization
     onLoad: function () {
-        this.scheduleOnce(this.runBezier, 0);
-        //this.draw();
+        this.scheduleOnce(this.draw, 0);
+        // this.draw();
 
         var array = [
             [10.0, 2.96, 6.85, 3.23, 9.9, 8.57, 0, 8.3],
             [10, 9.24, -3.06, 6.84, 5.23, 2.94, 0, 0.68],
             [0, 7.85, 13.1, 7.02, 2.79, 0.49, 10, 0.58],
             [0, 1.92, 4.34, 6.45, 7.88, 4.55, 10, 10],
+            [10.71, 9.27, 3.15, 8.54, 3.13, 2.6, 10.7, 0.86],
+            [10.67, 2.95, -3.2, 2.13, 2.75, 6.05, -0.59, 5.44]
         ];
 
         var win = cc.winSize;
@@ -95,12 +97,14 @@ cc.Class({
     },
 
     draw: function () {
-        var graphics = this.node.getComponent(cc.Graphics);
-        graphics.moveTo(this.bez[0].x, this.bez[0].y);
-        graphics.bezierCurveTo(this.bez[1].x, this.bez[1].y, this.bez[2].x, this.bez[2].y, this.bez[3].x, this.bez[3].y);    //这是贝塞尔的参数
-        graphics.strokeColor = cc.hexToColor('#097c25');
-        graphics.lineWidth = 2;
-        graphics.stroke();
+        for (let i = 0; i < this.bez.length; i++) {    
+            var graphics = this.node.getComponent(cc.Graphics);
+            graphics.moveTo(this.bez[i][0].x, this.bez[i][0].y);
+            graphics.bezierCurveTo(this.bez[i][1].x, this.bez[i][1].y, this.bez[i][2].x, this.bez[i][2].y, this.bez[i][3].x, this.bez[i][3].y);    //这是贝塞尔的参数
+            graphics.strokeColor = cc.hexToColor('#097c25');
+            graphics.lineWidth = 2;
+            graphics.stroke();
+        }
     },
 
     paraCurve: function () {
