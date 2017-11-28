@@ -14,11 +14,20 @@ cc.Class({
         // ...
         bez : [],
         index : 1,
+
+        P0 : cc.Vec2,
+        P1 : cc.Vec2,
+        P2 : cc.Vec2,
+        P3 : cc.Vec2,
+        total_length : 0,
+        nIndex : 0,
+        STEP : 70,
+        acc : 0,
     },
 
     // use this for initialization
     onLoad: function () {
-        this.scheduleOnce(this.runBezier, 2);
+        this.scheduleOnce(this.runBezier, 0);
         //this.draw();
 
         var array = [
@@ -43,6 +52,15 @@ cc.Class({
         }
 
         this.index = 1;
+
+        this.P0 = this.bez[1][0];
+        this.P1 = this.bez[1][1];
+        this.P2 = this.bez[1][2];
+        this.P3 = this.bez[1][3];
+    },
+
+    test : function() {
+        this.total_length = this.beze_length(1.0); 
     },
 
     generateCoins: function () {
@@ -92,4 +110,101 @@ cc.Class({
 
         this.node.runAction(bezier);
     },
+
+    //-------------------------------------------------------------------------------------  
+    //x坐标方程  
+    beze_x: function (t) {  
+        var it = 1-t;  
+        return it*it*it*this.P0.x + 3*it*it*t*this.P1.x + 3*it*t*t*this.P2.x + t*t*t*this.P3.x;  
+    },
+    //-------------------------------------------------------------------------------------  
+    //y坐标方程  
+    beze_y: function (t) {  
+        var it = 1-t;  
+        return it*it*it*this.P0.y + 3*it*it*t*this.P1.y + 3*it*t*t*this.P2.y + t*t*t*this.P3.y;  
+    },
+
+    //-------------------------------------------------------------------------------------  
+    //x坐标速度方程  
+    beze_speed_x: function (t) {  
+        var it = 1-t;  
+        return -3*this.P0.x*it*it + 3*this.P1.x*it*it - 6*this.P1.x*it*t + 6*this.P2.x*it*t - 3*this.P2.x*t*t + 3*this.P3.x*t*t;  
+    },
+    
+    //-------------------------------------------------------------------------------------  
+    //y坐标速度方程  
+    beze_speed_y: function(t) {  
+        var it = 1-t;  
+        return -3*this.P0.y*it*it + 3*this.P1.y*it*it - 6*this.P1.y*it*t + 6*this.P2.y*it*t - 3*this.P2.y*t*t + 3*this.P3.y*t*t;  
+    },  
+    //-------------------------------------------------------------------------------------  
+    //速度方程  
+    beze_speed: function (t) {  
+        var sx = this.beze_speed_x(t);
+        var sy = this.beze_speed_y(t);
+        return Math.sqrt(sx*sx+sy*sy);  
+    },
+    //-------------------------------------------------------------------------------------  
+    //长度方程,使用Simpson积分算法  
+    beze_length: function (t) {  
+        //在总长度范围内，使用simpson算法的分割数  
+        var TOTAL_SIMPSON_STEP = 10000;  
+        //分割份数  
+        var stepCounts = Math.round(TOTAL_SIMPSON_STEP*t);  
+        if(stepCounts % 2 == 0) stepCounts++;    //偶数
+        if(stepCounts==0) return 0;  
+
+        var halfCounts = Math.floor(stepCounts/2);  
+        var sum1 = 0, sum2 = 0;  
+        var dStep = Math.floor(t/stepCounts);  
+
+        for(let i = 0; i < halfCounts; i++) {  
+            sum1 += this.beze_speed((2*i+1)*dStep);  
+        }  
+        for(let i = 1; i < halfCounts; i++) {  
+            sum2 += this.beze_speed((2*i)*dStep);  
+        }  
+        return (this.beze_speed(0)+this.beze_speed(1)+2*sum2+4*sum1)*dStep/3.0;  
+    },  
+
+    //-------------------------------------------------------------------------------------  
+    //根据t推导出匀速运动自变量t'的方程(使用牛顿切线法)  
+
+    beze_even: function (t) {  
+        var len = t*this.total_length; //如果按照匀速增长,此时对应的曲线长度  
+        var t1 = t; 
+        var t2 = 0;  
+        
+        do {  
+            t2 = t1 - (this.beze_length(t1)-len)/this.beze_speed(t1);  
+            if(Math.abs(t1-t2) < Number.EPSILON) break;  
+            t1=t2;  
+        } while(true);  
+        return t2;  
+    },
+
+    // update: function (dt) {
+    //     this.acc += dt;
+
+    //     // if (this.acc > 1) 
+    //     {
+    //         // this.acc = 0;
+
+    //         if(this.acc < 10) {  
+    //             var t = this.acc/10;  
+    //             //求得匀速运动对应的t值
+    //             t = this.beze_even(t);
+    
+    //             //根据贝塞尔曲线函数，求得取得此时的x,y坐标          
+    //             var x = this.beze_x(t);  
+    //             var y = this.beze_y(t);   
+    
+    //             this.node.position = cc.v2(Math.round(x+0.5), Math.round(y+0.5));
+    
+    //             this.nIndex++;
+    //         } else {  
+                 
+    //         }
+    //     }
+    // },   
 });
